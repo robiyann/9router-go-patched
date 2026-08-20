@@ -3,6 +3,7 @@ package chat
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -82,16 +83,13 @@ func (h *ChatHandler) forwardGeminiNativeRequest(
 	}
 
 	if projectID == "" {
-		// antigravity has no OpenAI-compatible endpoint without a project ID — a
-		// bare POST to cloudcode-pa.googleapis.com is a guaranteed 404. Bail with
-		// an error so the fallback chain moves on instead of burning a request on
-		// a dead lane.
 		if provider == "antigravity" {
-			return fmt.Errorf("antigravity: no project ID — onboard the account in Antigravity (antigravity.google) then re-login")
+			projectID = generateAntigravityFallbackProjectID(connectionID)
+			log.Info("gemini", "generated fallback projectID for antigravity", "conn", connectionID, "projectID", projectID)
+		} else {
+			log.Info("gemini", "no projectID, fallback to OpenAI", "provider", provider)
+			return h.forwardRequest(ctx, w, cfg, apiKey, body, isStream, translateResponse, metrics)
 		}
-		// gemini-cli keeps its OpenAI-style fallback.
-		log.Info("gemini", "no projectID, fallback to OpenAI", "provider", provider)
-		return h.forwardRequest(ctx, w, cfg, apiKey, body, isStream, translateResponse, metrics)
 	}
 
 	resp, err := proxy.ForwardGemini(ctx, h.Client, cfg, apiKey, string(body), isStream, projectID, modelName)
@@ -447,4 +445,12 @@ func (h *ChatHandler) handleGeminiNonStream(ctx context.Context, w http.Response
 	w.WriteHeader(http.StatusOK)
 	w.Write(openaiResp)
 	return nil
+}
+
+func generateAntigravityFallbackProjectID(seed string) string {
+	if seed == "" {
+		seed = "antigravity-default"
+	}
+	hash := sha256.Sum256([]byte(seed))
+	return fmt.Sprintf("cloudcode-pa-%x", hash[:5])
 }
