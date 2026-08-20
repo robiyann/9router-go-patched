@@ -1,0 +1,32 @@
+# Build artifacts
+/9router-go
+/9router-go-*
+
+# Test binaries
+*.test
+*.out
+
+# Logs
+*.log
+/tmp/*.log
+
+# Data directory
+.9router/
+data/
+
+# Local overrides
+docker-compose.local.yml
+
+# Environment
+.env
+
+# Database
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+graphify-out
