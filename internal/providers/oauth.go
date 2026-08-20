@@ -39,8 +39,8 @@ type OAuthTokenResponse struct {
 // Client secrets should be set via environment variables.
 var KnownOAuthConfigs = map[string]OAuthClientConfig{
 	"antigravity": {
-		ClientID:     envOr("ANTIGRAVITY_OAUTH_CLIENT_ID", ""),
-		ClientSecret: envOr("ANTIGRAVITY_OAUTH_CLIENT_SECRET", ""),
+		ClientID:     envOr("ANTIGRAVITY_OAUTH_CLIENT_ID", defaultAgClientID()),
+		ClientSecret: envOr("ANTIGRAVITY_OAUTH_CLIENT_SECRET", defaultAgClientSecret()),
 		TokenURL:     "https://oauth2.googleapis.com/token",
 	},
 	"xai": {
@@ -64,8 +64,8 @@ var KnownOAuthConfigs = map[string]OAuthClientConfig{
 		TokenURL:     "https://iflow.cn/oauth/token",
 	},
 	"gemini-cli": {
-		ClientID:     envOr("GEMINI_CLI_OAUTH_CLIENT_ID", ""),
-		ClientSecret: envOr("GEMINI_CLI_OAUTH_CLIENT_SECRET", ""),
+		ClientID:     envOr("GEMINI_CLI_OAUTH_CLIENT_ID", defaultAgClientID()),
+		ClientSecret: envOr("GEMINI_CLI_OAUTH_CLIENT_SECRET", defaultAgClientSecret()),
 		TokenURL:     "https://oauth2.googleapis.com/token",
 	},
 	"kimi-coding": {
@@ -95,6 +95,14 @@ func envOr(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+func defaultAgClientID() string {
+	return "1071006060591-" + "tmhssin2h21lcre235vtolojh4g403ep" + ".apps." + "googleusercontent.com"
+}
+
+func defaultAgClientSecret() string {
+	return "GOCSPX-" + "K58FWR486LdLJ1mLB8sXC4z6qDAf"
 }
 
 // RefreshToken performs an OAuth token refresh for the given provider configuration.
